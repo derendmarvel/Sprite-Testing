@@ -11,6 +11,7 @@ import SpriteKit
 struct GameView: View {
     @State private var score: Int = 0
     @State private var coin: Int = 0
+    @State private var health: Int = 9
     
     var scene: SKScene {
         let gameScene = GameScene(size: UIScreen.main.bounds.size)
@@ -26,6 +27,12 @@ struct GameView: View {
                     self.coin = newCoin
             }
         }
+        
+        gameScene.healthUpdateHandler = { newHealth in
+            DispatchQueue.main.async {
+                self.health = newHealth
+            }
+        }
         return gameScene
     }
     
@@ -33,7 +40,7 @@ struct GameView: View {
         ZStack(alignment: .topTrailing) {
             SpriteView(scene: scene)
                 .ignoresSafeArea()
-            
+            HealthBar(health: health)
             HStack{
                 Spacer()
                 VStack{
@@ -46,7 +53,6 @@ struct GameView: View {
                 .padding(.top, 40)
                 .padding(.trailing, 20)
             }
-            
         }
     }
 }

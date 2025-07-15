@@ -11,6 +11,7 @@ import SpriteKit
 class GameManager {
     var scoreUpdateHandler: ((Int) -> Void)?
     var coinUpdateHandler: ((Int) -> Void)?
+    var healthUpdateHandler: ((Int) -> Void)?
     
     unowned let scene: SKScene
     var character: Character!
@@ -19,6 +20,7 @@ class GameManager {
     var coinCount = 0
     var internalScore = 0
     var scoreTimer: Timer?
+    var health = 9
     var backgrounds: [SKSpriteNode] = []
     
     let characterOriginalX: CGFloat
@@ -29,11 +31,12 @@ class GameManager {
     let coinCategory: UInt32 = 0x1 << 3
     let powerUpCategory: UInt32 = 0x1 << 4
     
-    init(scene: SKScene, scoreUpdateHandler: ((Int) -> Void)?, coinUpdateHandler: ((Int) -> Void)?) {
+    init(scene: SKScene, scoreUpdateHandler: ((Int) -> Void)?, coinUpdateHandler: ((Int) -> Void)?, healthUpdateHandler: ((Int) -> Void)?) {
         self.scene = scene
         self.characterOriginalX = scene.size.width / 4
         self.scoreUpdateHandler = scoreUpdateHandler
         self.coinUpdateHandler = coinUpdateHandler
+        self.healthUpdateHandler = healthUpdateHandler
     }
     
     func startGame() {
@@ -120,14 +123,17 @@ class GameManager {
         scoreTimer?.invalidate()
         internalScore = 0
         coinCount = 0
+        health = 9
         scoreUpdateHandler?(internalScore)
         coinUpdateHandler?(coinCount)
+        healthUpdateHandler?(health)
         
         if let view = scene.view {
             let newScene = GameScene(size: scene.size)
             newScene.scaleMode = .aspectFill
             newScene.scoreUpdateHandler = self.scoreUpdateHandler
             newScene.coinUpdateHandler = self.coinUpdateHandler
+            newScene.healthUpdateHandler = self.healthUpdateHandler
             let transition = SKTransition.fade(withDuration: 0.5)
             view.presentScene(newScene, transition: transition)
         }
@@ -182,6 +188,7 @@ class GameManager {
             if isAboveObstacle {
                 objectUnderCharacter = obstacleNode
             } else if !isAboveObstacle && isSideCollision {
+                print("Side collision detected!")
                 applySideCollisionEffect()
             }
             
@@ -318,6 +325,11 @@ class GameManager {
     }
     
     func applySideCollisionEffect() {
+        health -= 1
+        healthUpdateHandler?(health)
+        
+        print("Health decreased to \(health)")
+        
         // Prevent multiple triggers
         guard character.action(forKey: "blinking") == nil else { return }
 

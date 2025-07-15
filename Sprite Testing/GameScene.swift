@@ -11,13 +11,15 @@ import GameplayKit
 class GameScene: SKScene, SKPhysicsContactDelegate {
     var scoreUpdateHandler: ((Int) -> Void)?
     var coinUpdateHandler: ((Int) -> Void)?
+    var healthUpdateHandler: ((Int) -> Void)?
     private var gameManager: GameManager!
 
     override func didMove(to view: SKView) {
         gameManager = GameManager(
             scene: self,
             scoreUpdateHandler: scoreUpdateHandler,
-            coinUpdateHandler: coinUpdateHandler
+            coinUpdateHandler: coinUpdateHandler,
+            healthUpdateHandler: healthUpdateHandler
         )
         gameManager.startGame()
     }
@@ -27,6 +29,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
 
     func didBegin(_ contact: SKPhysicsContact) {
+        print("Collision detected!")
         gameManager.didBegin(contact)
     }
 
